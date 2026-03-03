@@ -802,7 +802,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       tableAssignments, assignTable,
       seatTable,
       reorder,
-      selectedCallCenterCustomer, setSelectedCallCenterCustomer, searchCustomerByPhone, callCenterComplaints: feedbacks, addCallCenterComplaint, updateCallCenterComplaint, getCustomerOrderHistory, currentCart
+      selectedCallCenterCustomer, setSelectedCallCenterCustomer, searchCustomerByPhone, callCenterComplaints: feedbacks, addCallCenterComplaint, updateCallCenterComplaint, getCustomerOrderHistory
     }}>
       {children}
     </AppContext.Provider>
