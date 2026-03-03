@@ -71,6 +71,10 @@ export interface OrderItem {
   size?: string;
   addons?: string[];
   note?: string;
+  // Call Center Sweets Pricing
+  weight?: number; // kg for sweets items
+  priceOverride?: number; // Override base price
+  overrideReason?: string; // Discount reason tracking
 }
 
 export interface OrderTimeline {
@@ -157,11 +161,19 @@ export interface Employee {
   role: 'CASHIER' | 'WAITER' | 'MANAGER' | 'ADMIN' | 'BRANCH_MANAGER' | 'HOSPITALITY' | 'KITCHEN' | 'DEPARTMENT_STAFF' | 'ORDER_AGGREGATOR';
 }
 
+export interface SavedAddress {
+  id: string;
+  type: 'HOME' | 'OFFICE' | 'FARM' | 'OTHER';
+  address: string;
+  deliveryFee: number; // Fee for this address
+  isDefault?: boolean;
+}
+
 export interface User {
   id: string;
   name: string;
   phone: string;
-  role: 'CASHIER' | 'CUSTOMER' | 'WAITER' | 'BRANCH_MANAGER' | 'HOSPITALITY' | 'KITCHEN' | 'DEPARTMENT_STAFF' | 'ORDER_AGGREGATOR';
+  role: 'CASHIER' | 'CUSTOMER' | 'WAITER' | 'BRANCH_MANAGER' | 'HOSPITALITY' | 'KITCHEN' | 'DEPARTMENT_STAFF' | 'ORDER_AGGREGATOR' | 'CALL_CENTER';
   branchId?: string;
   departmentId?: string;
   points: number;
@@ -169,10 +181,15 @@ export interface User {
   tier: 'SILVER' | 'GOLD' | 'PLATINUM';
   vouchers: any[];
   favorites: string[];
-  addresses: any[];
+  addresses: SavedAddress[];
   transactions: Transaction[];
   savedCards: SavedCard[];
   commissionRate?: number;
+  // Call Center Customer Profile
+  lastDeliveryDriver?: string; // Driver name from last delivery
+  frequentItems?: string[]; // Array of frequently ordered item IDs ("The Usual")
+  personalityTags?: string[]; // AI-generated tags like "Prefers Spicy", "Late Night Buyer"
+  orderHistory?: string[]; // Array of order IDs for history
 }
 
 export enum TableStatus {
@@ -235,6 +252,9 @@ export interface CustomerFeedback {
   comment: string;
   status: 'NEW' | 'REVIEWED' | 'RESOLVED';
   timestamp: Date;
+  // Call Center Complaint Tracking
+  rootCause?: 'COLD_FOOD' | 'LATE_DELIVERY' | 'MISSING_ITEM' | 'WRONG_ORDER' | 'QUALITY_ISSUE' | 'OTHER';
+  linkedOrderId?: string; // Link to specific previous order
 }
 
 export interface StaffTask {

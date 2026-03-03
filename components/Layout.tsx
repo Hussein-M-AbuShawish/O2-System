@@ -64,6 +64,7 @@ export const AppLayout: React.FC<{
   const isHospitality = userRole === 'HOSPITALITY';
   const isDeptStaff = userRole === 'DEPARTMENT_STAFF';
   const isAggregator = userRole === 'ORDER_AGGREGATOR';
+  const isCallCenter = userRole === 'CALL_CENTER';
 
   return (
     <div className="flex h-screen bg-slate-950 overflow-hidden text-slate-100" dir="rtl">
@@ -152,6 +153,13 @@ export const AppLayout: React.FC<{
               <SidebarItem 
                 icon={LayoutGrid} label="شبكة الرفوف" 
                 active={activeView === 'aggregator_shelves'} collapsed={isCollapsed} onClick={() => setActiveView('aggregator_shelves')} 
+              />
+            </>
+          ) : isCallCenter ? (
+            <>
+              <SidebarItem 
+                icon={ShoppingCart} label="مركز الاتصالات" 
+                active={activeView === 'call_center'} collapsed={isCollapsed} onClick={() => setActiveView('call_center')} 
               />
             </>
           ) : (

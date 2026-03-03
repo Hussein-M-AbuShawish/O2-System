@@ -4,7 +4,7 @@ import {
   Order, OrderType, OrderStatus, MenuItem, OrderItem, User, PaymentMethod, 
   Transaction, SavedCard, Table, Shift, Branch, Department, JobTitle, JobType, Employee,
   TableStatus, FinancialTransaction, FinancialTransactionType,
-  CustomerFeedback, StaffTask, TableAssignment
+  CustomerFeedback, StaffTask, TableAssignment, SavedAddress
 } from './types';
 import { TABLES } from './constants';
 
@@ -88,6 +88,15 @@ interface AppContextType {
   notifications: { id: string; message: string; time: Date; read: boolean }[];
   addNotification: (message: string) => void;
   markNotificationRead: (id: string) => void;
+
+  // Call Center State
+  selectedCallCenterCustomer: User | null;
+  setSelectedCallCenterCustomer: (user: User | null) => void;
+  searchCustomerByPhone: (phone: string) => User | null;
+  callCenterComplaints: CustomerFeedback[];
+  addCallCenterComplaint: (complaint: Omit<CustomerFeedback, 'id' | 'timestamp' | 'status'>) => void;
+  updateCallCenterComplaint: (id: string, complaint: Partial<CustomerFeedback>) => void;
+  getCustomerOrderHistory: (customerId: string) => Order[];
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -129,7 +138,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   ]);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [userRole, setUserRole] = useState<'CASHIER' | 'CUSTOMER' | 'WAITER' | 'ADMIN' | 'BRANCH_MANAGER' | 'HOSPITALITY' | 'DEPARTMENT_STAFF' | 'ORDER_AGGREGATOR' | null>(null);
+  const [userRole, setUserRole] = useState<'CASHIER' | 'CUSTOMER' | 'WAITER' | 'ADMIN' | 'BRANCH_MANAGER' | 'HOSPITALITY' | 'DEPARTMENT_STAFF' | 'ORDER_AGGREGATOR' | 'CALL_CENTER' | null>(null);
   const [currentCart, setCurrentCart] = useState<OrderItem[]>([]);
   const [cartOrderType, setCartOrderType] = useState<OrderType>(OrderType.TAKEAWAY);
   const [currentShift, setCurrentShift] = useState<Shift | null>(null);
@@ -160,6 +169,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   ]);
   const [notifications, setNotifications] = useState<{ id: string; message: string; time: Date; read: boolean }[]>([]);
+  
+  // Call Center State
+  const [selectedCallCenterCustomer, setSelectedCallCenterCustomer] = useState<User | null>(null);
+  const [callCenterComplaints, setCallCenterComplaints] = useState<CustomerFeedback[]>([]);
 
   const addNotification = (message: string) => {
     setNotifications(prev => [{ id: Math.random().toString(36).substr(2, 9), message, time: new Date(), read: false }, ...prev]);
@@ -241,12 +254,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const updateEmployee = (id: string, e: Partial<Employee>) => setEmployees(p => p.map(x => x.id === id ? { ...x, ...e } : x));
   const deleteEmployee = (id: string) => setEmployees(p => p.filter(x => x.id !== id));
 
-  const login = (name: string, role: 'CASHIER' | 'CUSTOMER' | 'WAITER' | 'ADMIN' | 'BRANCH_MANAGER' | 'HOSPITALITY' | 'DEPARTMENT_STAFF' | 'ORDER_AGGREGATOR', phone: string = '', branchId: string = 'b1', departmentId?: string) => {
+  const login = (name: string, role: 'CASHIER' | 'CUSTOMER' | 'WAITER' | 'ADMIN' | 'BRANCH_MANAGER' | 'HOSPITALITY' | 'DEPARTMENT_STAFF' | 'ORDER_AGGREGATOR' | 'CALL_CENTER', phone: string = '', branchId: string = 'b1', departmentId?: string) => {
     setUserRole(role);
     setCurrentUser({
       id: 'u_' + Math.random().toString(36).substr(2, 5),
       name, phone, role: (role === 'ADMIN' ? 'CASHIER' : role === 'BRANCH_MANAGER' ? 'BRANCH_MANAGER' : role),
-      branchId: (role === 'BRANCH_MANAGER' || role === 'DEPARTMENT_STAFF' || role === 'ORDER_AGGREGATOR') ? branchId : undefined,
+      branchId: (role === 'BRANCH_MANAGER' || role === 'DEPARTMENT_STAFF' || role === 'ORDER_AGGREGATOR' || role === 'CALL_CENTER') ? branchId : undefined,
       departmentId: role === 'DEPARTMENT_STAFF' ? departmentId : undefined,
       points: 120, balance: 350.0, tier: 'GOLD', vouchers: [], favorites: ['1', '3'], addresses: [], savedCards: [], transactions: []
     });
@@ -725,6 +738,52 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
   const setOrderType = (type: OrderType) => setCartOrderType(type);
 
+  // Call Center Methods
+  const searchCustomerByPhone = (phone: string): User | null => {
+    // Search in active orders and feedbacks for customer with matching phone
+    const order = activeOrders.find(o => o.customerPhone === phone);
+    if (order && order.customerId) {
+      // In real app, fetch from database; here return mock customer
+      return {
+        id: order.customerId,
+        name: order.customerName || 'عميل',
+        phone,
+        role: 'CUSTOMER',
+        points: 150,
+        balance: 500,
+        tier: 'GOLD',
+        vouchers: [],
+        favorites: [],
+        addresses: [],
+        transactions: [],
+        savedCards: [],
+        lastDeliveryDriver: 'أحمد محمد',
+        frequentItems: ['1', '3'],
+        personalityTags: ['يفضل الحار', 'مشتري ليلي'],
+        orderHistory: [order.id]
+      };
+    }
+    return null;
+  };
+
+  const getCustomerOrderHistory = (customerId: string): Order[] => {
+    return activeOrders.filter(o => o.customerId === customerId);
+  };
+
+  const addCallCenterComplaint = (complaint: Omit<CustomerFeedback, 'id' | 'timestamp' | 'status'>) => {
+    const newComplaint: CustomerFeedback = {
+      ...complaint,
+      id: 'cc_' + Math.random().toString(36).substr(2, 9),
+      timestamp: new Date(),
+      status: 'NEW'
+    };
+    setCallCenterComplaints(prev => [newComplaint, ...prev]);
+  };
+
+  const updateCallCenterComplaint = (id: string, complaint: Partial<CustomerFeedback>) => {
+    setCallCenterComplaints(prev => prev.map(c => c.id === id ? { ...c, ...complaint } : c));
+  };
+
   return (
     <AppContext.Provider value={{
       activeOrders, currentUser, currentCart, cartOrderType, userRole,
@@ -742,7 +801,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       staffTasks, addTask, updateTask,
       tableAssignments, assignTable,
       seatTable,
-      reorder
+      reorder,
+      selectedCallCenterCustomer, setSelectedCallCenterCustomer, searchCustomerByPhone, callCenterComplaints: feedbacks, addCallCenterComplaint, updateCallCenterComplaint, getCustomerOrderHistory
     }}>
       {children}
     </AppContext.Provider>
