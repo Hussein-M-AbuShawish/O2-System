@@ -10,43 +10,44 @@ import { AnalyticsDashboard } from './CallCenter/AnalyticsDashboard';
 import { PhoneOff, BarChart3, AlertCircle, Plus, Edit } from 'lucide-react';
 
 export const CallCenterDashboard: React.FC = () => {
-  const { selectedCallCenterCustomer, setSelectedCallCenterCustomer, getCustomerOrderHistory, reorder, currentCart } = useApp();
-  const [activeTab, setActiveTab] = useState<'overview' | 'analytics' | 'complaints' | 'new_order'>('overview');
-  const [newOrder, setNewOrder] = useState<Order | null>(null);
+  try {
+    const { selectedCallCenterCustomer, setSelectedCallCenterCustomer, getCustomerOrderHistory, reorder, currentCart } = useApp();
+    const [activeTab, setActiveTab] = useState<'overview' | 'analytics' | 'complaints' | 'new_order'>('overview');
+    const [newOrder, setNewOrder] = useState<Order | null>(null);
 
-  const orderHistory = selectedCallCenterCustomer ? getCustomerOrderHistory(selectedCallCenterCustomer.id) : [];
-  const lastOrder = orderHistory.length > 0 ? orderHistory[0] : null;
+    const orderHistory = selectedCallCenterCustomer ? getCustomerOrderHistory(selectedCallCenterCustomer.id) : [];
+    const lastOrder = orderHistory.length > 0 ? orderHistory[0] : null;
 
-  const handleReorder = (customer: any) => {
-    if (lastOrder) {
-      reorder(lastOrder.id);
-    }
-  };
-
-  const handleCreateNewOrder = () => {
-    if (!selectedCallCenterCustomer) return;
-    const newOrderObj: Order = {
-      id: 'o_' + Math.random().toString(36).substr(2, 9),
-      orderNumber: 'ORD-' + Math.floor(Math.random() * 10000),
-      type: OrderType.DELIVERY,
-      status: OrderStatus.PENDING,
-      items: currentCart.length > 0 ? currentCart : [],
-      customerId: selectedCallCenterCustomer.id,
-      customerName: selectedCallCenterCustomer.name,
-      customerPhone: selectedCallCenterCustomer.phone,
-      createdAt: new Date(),
-      subtotal: 0,
-      tax: 0,
-      discount: 0,
-      total: 0,
-      timeline: [{ status: OrderStatus.PENDING, time: new Date() }]
+    const handleReorder = (customer: any) => {
+      if (lastOrder) {
+        reorder(lastOrder.id);
+      }
     };
-    setNewOrder(newOrderObj);
-    setActiveTab('new_order');
-  };
 
-  return (
-    <div className="h-full bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex flex-col">
+    const handleCreateNewOrder = () => {
+      if (!selectedCallCenterCustomer) return;
+      const newOrderObj: Order = {
+        id: 'o_' + Math.random().toString(36).substr(2, 9),
+        orderNumber: 'ORD-' + Math.floor(Math.random() * 10000),
+        type: OrderType.DELIVERY,
+        status: OrderStatus.PENDING,
+        items: currentCart.length > 0 ? currentCart : [],
+        customerId: selectedCallCenterCustomer.id,
+        customerName: selectedCallCenterCustomer.name,
+        customerPhone: selectedCallCenterCustomer.phone,
+        createdAt: new Date(),
+        subtotal: 0,
+        tax: 0,
+        discount: 0,
+        total: 0,
+        timeline: [{ status: OrderStatus.PENDING, time: new Date() }]
+      };
+      setNewOrder(newOrderObj);
+      setActiveTab('new_order');
+    };
+
+    return (
+      <div className="h-full bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex flex-col">
       {/* Search Header */}
       <CustomerSearchHeader />
 
@@ -170,5 +171,16 @@ export const CallCenterDashboard: React.FC = () => {
         </div>
       </div>
     </div>
-  );
-};
+      );
+    } catch (error) {
+      console.error('CallCenter Dashboard Error:', error);
+      return (
+        <div className="h-full bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center">
+          <div className="text-center text-white">
+            <h2 className="text-2xl font-bold mb-2">حدث خطأ</h2>
+            <p className="text-slate-400">{String(error)}</p>
+          </div>
+        </div>
+      );
+    }
+  };

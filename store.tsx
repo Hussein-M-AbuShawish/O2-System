@@ -37,7 +37,7 @@ interface AppContextType {
   updateEmployee: (id: string, emp: Partial<Employee>) => void;
   deleteEmployee: (id: string) => void;
 
-  login: (name: string, role: 'CASHIER' | 'CUSTOMER' | 'WAITER' | 'ADMIN' | 'BRANCH_MANAGER' | 'HOSPITALITY' | 'DEPARTMENT_STAFF' | 'ORDER_AGGREGATOR', phone?: string, branchId?: string, departmentId?: string) => void;
+  login: (name: string, role: 'CASHIER' | 'CUSTOMER' | 'WAITER' | 'ADMIN' | 'BRANCH_MANAGER' | 'HOSPITALITY' | 'DEPARTMENT_STAFF' | 'ORDER_AGGREGATOR' | 'CALL_CENTER', phone?: string, branchId?: string, departmentId?: string) => void;
   logout: () => void;
   addToCart: (item: MenuItem, customization?: any) => void;
   removeFromCart: (uniqueId: string) => void;
@@ -700,7 +700,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const assignShelfToOrder = (orderId: string, shelf: string) => {
     setActiveOrders(prev => prev.map(o => {
       if (o.id === orderId) {
-        addNotification(`تم تخصيص الرف ${shelf} للطلب #${o.orderNumber.split('-').pop()}`);
+        addNotification(`تم تخ��يص الرف ${shelf} للطلب #${o.orderNumber.split('-').pop()}`);
         return { ...o, shelfLocation: shelf };
       }
       return o;
@@ -802,7 +802,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       tableAssignments, assignTable,
       seatTable,
       reorder,
-      selectedCallCenterCustomer, setSelectedCallCenterCustomer, searchCustomerByPhone, callCenterComplaints: feedbacks, addCallCenterComplaint, updateCallCenterComplaint, getCustomerOrderHistory
+      selectedCallCenterCustomer, setSelectedCallCenterCustomer, searchCustomerByPhone, callCenterComplaints: feedbacks, addCallCenterComplaint, updateCallCenterComplaint, getCustomerOrderHistory, currentCart
     }}>
       {children}
     </AppContext.Provider>

@@ -8,7 +8,7 @@ interface OrderLifecycleStepperProps {
 
 const CALL_CENTER_STAGES = [
   { status: OrderStatus.PENDING, label: 'معلق', icon: '⏳' },
-  { status: OrderStatus.PREPARING, label: 'في المطبخ', icon: '👨‍🍳' },
+  { status: OrderStatus.IN_PROGRESS, label: 'في المطبخ', icon: '👨‍🍳' },
   { status: OrderStatus.READY, label: 'فحص الجودة', icon: '✓' },
   { status: OrderStatus.ON_DELIVERY, label: 'مع السائق', icon: '🚗' },
   { status: OrderStatus.DELIVERED, label: 'تم التسليم', icon: '✓✓' }
