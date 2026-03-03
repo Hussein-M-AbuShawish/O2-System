@@ -20,6 +20,9 @@ import { CallCenterDashboard } from './components/CallCenterDashboard';
 const Main: React.FC = () => {
   const { currentUser, currentShift, userRole, editingOrderId } = useApp();
   const [activeView, setActiveView] = useState('pos');
+  
+  // Type assertion for userRole to handle CALL_CENTER
+  const currentRole = userRole as string;
 
   useEffect(() => {
     if (userRole === 'ADMIN') {
